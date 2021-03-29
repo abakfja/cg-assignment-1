@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <ft2build.h>
 #include <window.h>
 #include <matrices.h>
 #include <nonedit.h>
@@ -31,6 +31,15 @@ void draw();
 
 void tick_elements();
 
+float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
+
+void reset_screen() {
+    float top = screen_center_y + 4 / screen_zoom;
+    float bottom = screen_center_y - 4 / screen_zoom;
+    float left = screen_center_x - 4 / screen_zoom;
+    float right = screen_center_x + 4 / screen_zoom;
+    Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
+}
 
 int main(int argc, char **argv) {
     int width = 600;

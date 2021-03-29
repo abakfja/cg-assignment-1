@@ -96,6 +96,7 @@ tags
 
 # CMake
 cmake-build-*/
+build
 
 # Mongo Explorer plugin
 .idea/**/mongoSettings.xml
@@ -140,3 +141,4 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
+.clangd

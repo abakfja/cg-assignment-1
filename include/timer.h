@@ -9,7 +9,7 @@ class Timer {
 public:
     Timer() = default;
 
-    constexpr explicit Timer(double interval) noexcept;
+    explicit Timer(double interval) noexcept;
 
     double interval{};
 

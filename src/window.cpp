@@ -1,6 +1,7 @@
-//
-// Created by captain on 3/24/21.
-//
+/*
+ * Created by captain on 3/24/21.
+ * handles window functionalities
+ */
 
 #include <iostream>
 

@@ -23,22 +23,24 @@ struct VAO {
     GLenum FillMode;
     int NumVertices;
 };
-typedef struct VAO VAO;
 
 GLFWwindow *initGLFW(int width, int height);
 
 GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path);
 
-struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data,
+VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data,
                            const GLfloat *color_buffer_data, GLenum fill_mode = GL_FILL);
 
-struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, GLfloat red,
+VAO *create2DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data,
+                           const GLfloat *color_buffer_data, GLenum fill_mode = GL_FILL);
+
+VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, GLfloat red,
                            GLfloat green, GLfloat blue, GLenum fill_mode = GL_FILL);
 
-struct VAO *
+VAO *
 create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, color_t color,
                GLenum fill_mode = GL_FILL);
 
-void draw3DObject(struct VAO *vao);
+void drawObject(struct VAO *vao);
 
 #endif //CG_ASSIGNMENT_NONEDIT_H

@@ -154,9 +154,9 @@ GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
 
 
 /* Generate VAO, VBOs and return VAO handle */
-struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data,
+VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data,
                            const GLfloat *color_buffer_data, GLenum fill_mode) {
-    auto *vao = new struct VAO;
+    auto *vao = new VAO;
     vao->PrimitiveMode = primitive_mode;
     vao->NumVertices = numVertices;
     vao->FillMode = fill_mode;
@@ -195,10 +195,53 @@ struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat
     return vao;
 }
 
+/* Generate VAO, VBOs and return VAO handle */
+VAO *create2DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data,
+                           const GLfloat *color_buffer_data, GLenum fill_mode) {
+    auto *vao = new struct VAO;
+    vao->PrimitiveMode = primitive_mode;
+    vao->NumVertices = numVertices;
+    vao->FillMode = fill_mode;
+    std::cout << numVertices << std::endl;
+    // Create Vertex Array Object
+    // Should be done after CreateWindow and before any other GL calls
+    glGenVertexArrays(1, &(vao->VertexArrayID)); // VAO
+    glGenBuffers(1, &(vao->VertexBuffer)); // VBO - vertices
+    glGenBuffers(1, &(vao->ColorBuffer)); // VBO - colors
+
+    glBindVertexArray(vao->VertexArrayID); // Bind the VAO
+    glBindBuffer(GL_ARRAY_BUFFER, vao->VertexBuffer); // Bind the VBO vertices
+    // Copy the vertices into VBO
+    glBufferData(GL_ARRAY_BUFFER, 2 * numVertices * sizeof(GLfloat), vertex_buffer_data,GL_STATIC_DRAW);
+    glVertexAttribPointer(
+            0,                  // attribute 0. Vertices
+            2,                  // size (x,y)
+            GL_FLOAT,           // type
+            GL_FALSE,           // normalized?
+            0,                  // stride
+            (void *) nullptr    // array buffer offset
+    );
+
+    glBindBuffer(GL_ARRAY_BUFFER, vao->ColorBuffer); // Bind the VBO colors
+    glBufferData(GL_ARRAY_BUFFER, 3 * numVertices * sizeof(GLfloat), color_buffer_data,
+                 GL_STATIC_DRAW); // Copy the vertex colors
+    glVertexAttribPointer(
+            1,   // attribute 1. Color
+            3,       // size (r,g,b)
+            GL_FLOAT,                     // type
+            GL_FALSE,                     // normalized?
+            0,                            // stride
+            (void *) nullptr                    // array buffer offset
+    );
+
+    return vao;
+}
+
+
 /* Generate VAO, VBOs and return VAO handle - Common Color for all vertices */
-struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, const GLfloat red,
+VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, const GLfloat red,
                            const GLfloat green, const GLfloat blue, GLenum fill_mode) {
-    auto* color_buffer_data = new GLfloat[3 * numVertices];
+    auto *color_buffer_data = new GLfloat[3 * numVertices];
     for (int i = 0; i < numVertices; i++) {
         color_buffer_data[3 * i] = red;
         color_buffer_data[3 * i + 1] = green;
@@ -208,7 +251,7 @@ struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat
     return create3DObject(primitive_mode, numVertices, vertex_buffer_data, color_buffer_data, fill_mode);
 }
 
-struct VAO *
+VAO *
 create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, const color_t color,
                GLenum fill_mode) {
     return create3DObject(primitive_mode, numVertices, vertex_buffer_data, color.r / 256.0, color.g / 256.0,
@@ -216,7 +259,7 @@ create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buf
 }
 
 /* Render the VBOs handled by VAO */
-void draw3DObject(struct VAO *vao) {
+void drawObject(struct VAO *vao) {
     // Change the Fill Mode for this object
     glPolygonMode(GL_FRONT_AND_BACK, vao->FillMode);
 

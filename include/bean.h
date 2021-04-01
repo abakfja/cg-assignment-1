@@ -15,6 +15,7 @@ struct bean {
     glm::vec2 position{};
     float speed{};
     std::string resource;
+    bool orientation = true;
 
     bean() = default;
 
@@ -25,6 +26,26 @@ struct bean {
     void tick();
 
     void init();
+
+    GLfloat top() const {
+        return position.y + 1.0;
+    }
+
+    GLfloat bottom() const {
+        return position.y - 0.5;
+    }
+
+    GLfloat left() const {
+        return position.x - 0.65;
+    }
+
+    GLfloat right() const {
+        return position.x + 0.65;
+    }
+
+    GLfloat get_orientation() const {
+        return orientation ? -1.0f : 1.0f;
+    };
 
     void draw(glm::mat4 VP) const;
 };

@@ -11,13 +11,12 @@
 #include <matrices.h>
 #include <iostream>
 
-board::board(glm::vec2 _pos, GLfloat _w, GLfloat _h) : position{_pos}, width{_w}, height{_h} {
+board::board(GLfloat _w, GLfloat _h) : width{_w}, height{_h} {
     init();
 }
 
 void board::draw(glm::mat4 VP) const {
-    auto translate = glm::translate(glm::vec3{-width / 2, -height / 2, 0});
-    auto M = translate;
+    auto M = glm::translate(glm::vec3{});
     auto MVP = VP * M;
     glUniformMatrix4fv(Matrices.mvpId, 1, GL_FALSE, &MVP[0][0]);
     glUniformMatrix4fv(Matrices.modelId, 1, GL_FALSE, &M[0][0]);
@@ -26,12 +25,12 @@ void board::draw(glm::mat4 VP) const {
 
 inline void board::init() {
     GLfloat vertex_buffer_data[18] = {
-            position.x, position.y, 0,
-            position.x + width, position.y, 0,
-            position.x + width, position.y + height, 0,
-            position.x + width, position.y + height, 0,
-            position.x, position.y + height, 0,
-            position.x, position.y, 0
+            0, 0, 0,
+            width, 0, 0,
+            width, height, 0,
+            width, height, 0,
+            0, height, 0,
+            0, 0, 0
     };
     GLfloat normal_buffer_data[18] = {
             0, 0, 1,
@@ -92,9 +91,8 @@ void maze::init() {
                                   vertex_buffer_data, color, normal_buffer_data, GL_FILL);
 }
 
-void maze::draw(glm::mat4 VP, glm::vec2 pos) const {
-    auto translate = glm::translate(glm::vec3{pos, 0});
-    auto M = translate;
+void maze::draw(glm::mat4 VP) const {
+    auto M = glm::translate(glm::vec3{});
     auto MVP = VP * M;
     glUniformMatrix4fv(Matrices.mvpId, 1, GL_FALSE, &MVP[0][0]);
     glUniformMatrix4fv(Matrices.modelId, 1, GL_FALSE, &M[0][0]);

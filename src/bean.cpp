@@ -21,9 +21,8 @@ void bean::tick() {
 }
 
 void bean::draw(glm::mat4 VP) const {
-    auto orientation = glm::scale(glm::vec3{1.0f, 1.0f, 1.0f});
-    auto translate = glm::translate(glm::vec3{this->position, 0});
-    auto M = translate * orientation;
+    auto orient= glm::scale(glm::vec3{get_orientation(), 1.0f, 1.0f});
+    auto M = glm::translate(glm::vec3{this->position, 0.0f}) * orient;
     auto MVP = VP * M;
     glUniformMatrix4fv(Matrices.mvpId, 1, GL_FALSE, &MVP[0][0]);
     glUniformMatrix4fv(Matrices.modelId, 1, GL_FALSE, &M[0][0]);

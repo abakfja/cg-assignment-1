@@ -17,7 +17,7 @@
 GLMatrices Matrices;
 GLuint programID;
 GLFWwindow *window;
-game amongus{5, 4};
+game amongus{};
 float z = 11.0f;
 Timer t60(1.0 / 120);
 
@@ -107,7 +107,7 @@ void draw() {
     setProgramFloat(programID, "ambientStrength", 0.0f);
     setProgramFloat(programID, "diffuseStrength", 1.0f);
     setProgramVec3(programID, "lightColor", glm::vec3{1.0f, 1.0f, 1.0f});
-    amongus.draw3d(VP);
+    amongus.draw(VP);
 }
 
 void tick_elements() {

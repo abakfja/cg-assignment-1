@@ -7,24 +7,72 @@
 
 #include <player.h>
 #include <board.h>
-#include <items.h>
+#include <item.h>
 #include <vector>
+#include <set>
+#include <iostream>
 
+/**
+ * The maze and board would be spawned at 0, 0 to width, height
+ * and impostor and player would also be spawned to that coordinate
+ */
 class game {
 public:
     player p;
     impostor im;
     board b;
     maze m;
-    const int row, col;
-    static constexpr int w = 6, h = 6;
 
-    game(int r, int c);
+    bool is_dark = true;
+    bool impostor_active = true;
+    int score = 0;
+
+    static constexpr int row = 5, col = 4;
+    static constexpr float w = 6, h = 6;
+
+    std::vector<wall> walls[row][col];
+    std::vector<obstacle> obs[row][col];
+    std::vector<powerup> pup[row][col];
+
+    std::pair<int, int> player_b() const {
+        return std::make_pair(std::floor(p.position.x / w), std::floor(p.position.y / h));
+    };
+
+    std::pair<int, int> impostor_b() const {
+        return std::make_pair(std::floor(im.position.x / w), std::floor(im.position.y / h));
+    };
+
+    bool collides(wall wawa) {
+        int t = 0;
+
+        if (wawa.end.x == wawa.start.x) {
+            auto a = std::max(wawa.end.y, wawa.start.y);
+            auto aa = std::min(wawa.end.y, wawa.start.y);
+            return p.left() <= wawa.end.x and p.right() >= wawa.end.x and p.top() >= aa and p.bottom() <= a;
+        }
+        auto a = std::max(wawa.end.x, wawa.start.x);
+        auto aa = std::min(wawa.end.x, wawa.start.x);
+        return p.top() >= wawa.end.y and p.bottom() <= wawa.end.y and p.right() >= aa and p.left() <= a;
+    }
+
+    bool collides(item it) {
+        return (p.left() <= it.right() &&
+                p.right() >= it.left() &&
+                p.top() <= it.bottom() &&
+                p.bottom() >= it.top());
+    }
+
+    game() = default;
 
     void init();
 
-    void draw2d(glm::mat4) const;
-    void draw3d(glm::mat4) const;
+    void gen_maze();
+
+    void gen_items();
+
+    void gen_tasks();
+
+    void draw(glm::mat4 VP) const;
 
     void get_input(const int *keys);
 };

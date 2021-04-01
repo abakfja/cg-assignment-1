@@ -11,12 +11,11 @@
 #include <nonedit.h>
 
 struct board {
-    glm::vec2 position{};
     float width{}, height{};
 
     board() = default;
 
-    board(glm::vec2, float, float);
+    board(float, float);
 
     void draw(glm::mat4) const;
 
@@ -42,7 +41,7 @@ struct maze {
 
     void init();
 
-    void draw(glm::mat4, glm::vec2) const;
+    void draw(glm::mat4) const;
 
     void add_wall(wall);
 

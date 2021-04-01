@@ -4,19 +4,40 @@
 
 #include "game.h"
 
-game::game() :
-        b{glm::vec2{0, 0}, 5.0f, 5.0f},
-        p{glm::vec2{0, 0}, 0.1f},
-        im{glm::vec2{0, 0}, 0.1f} {
+game::game(int r, int c) : row{r}, col{c} {
 }
 
 
 void game::init() {
+    // create the maze before init it
+
+    b = board{glm::vec2{0, 0}, static_cast<float>(row * w), static_cast<float>(col * h)};
+
+    m = maze(2.0f);
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            m.add_wall(wall(glm::vec2(i * w, j * h), glm::vec2((i + 1) * w, j * h)));
+            m.add_wall(wall(glm::vec2(i * w, j * h), glm::vec2(i * w, (j + 1) * h)));
+        }
+    }
+
+    m.init();
+    p = player{glm::vec2{0, 0}, 0.1f};
+    im = impostor{glm::vec2{0, 0}, 0.1f};
 
 }
 
-void game::draw(glm::mat4 VP) {
+
+void game::draw2d(glm::mat4 VP) const {
+//    b.draw(VP);
+//    m.draw(VP, glm::vec2{0, 0});
+//    im.draw(VP);
+//    p.draw(VP);
+}
+
+void game::draw3d(glm::mat4 VP) const {
     b.draw(VP);
+    m.draw(VP, -(glm::vec2{row * w, col * h} / 2.0f));
     im.draw(VP);
     p.draw(VP);
 }

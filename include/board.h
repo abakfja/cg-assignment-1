@@ -5,14 +5,18 @@
 #ifndef CG_ASSIGNMENT_BOARD_H
 #define CG_ASSIGNMENT_BOARD_H
 
+#include <vector>
+
 #include <glm/glm.hpp>
 #include <nonedit.h>
 
 struct board {
-    glm::vec2 position;
-    float width, height;
+    glm::vec2 position{};
+    float width{}, height{};
 
-    explicit board(glm::vec2, float, float);
+    board() = default;
+
+    board(glm::vec2, float, float);
 
     void draw(glm::mat4) const;
 
@@ -22,16 +26,28 @@ struct board {
 };
 
 struct wall {
-    glm::vec3 position;
+    glm::vec2 start;
+    glm::vec2 end;
 
+    explicit wall(glm::vec2, glm::vec2);
+};
 
-    explicit wall(glm::vec3);
+struct maze {
+    std::vector<wall> walls;
+    float size{};
 
-    void draw(glm::mat4);
+    maze() = default;
+
+    explicit maze(float _size) : size{_size} {};
 
     void init();
 
+    void draw(glm::mat4, glm::vec2) const;
+
+    void add_wall(wall);
+
     VAO *object = nullptr;
+
 };
 
 

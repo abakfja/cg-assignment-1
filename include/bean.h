@@ -7,7 +7,6 @@
 
 #include <nonedit.h>
 #include <glm/glm.hpp>
-#include <glad/glad.h>
 #include <string>
 
 struct bean {

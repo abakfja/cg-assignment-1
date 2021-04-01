@@ -4,14 +4,12 @@
 #include <iostream>
 
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <ft2build.h>
 #include <window.h>
 #include <matrices.h>
-#include <nonedit.h>
 #include <timer.h>
 #include <player.h>
 #include <game.h>
@@ -19,11 +17,9 @@
 GLMatrices Matrices;
 GLuint programID;
 GLFWwindow *window;
-game amongus;
-
-const color_t COLOR_BACKGROUND = {123, 34, 0};
-
-Timer t60(1.0 / 60);
+game amongus{5, 4};
+float z = 11.0f;
+Timer t60(1.0 / 120);
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 
@@ -32,7 +28,7 @@ void reset_screen() {
     float bottom = screen_center_y - 4 / screen_zoom;
     float left = screen_center_x - 4 / screen_zoom;
     float right = screen_center_x + 4 / screen_zoom;
-    Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
+    Matrices.projection = glm::ortho(left, right, bottom, top, -10.0f, 10.0f);
 }
 
 
@@ -43,15 +39,17 @@ void initGL(GLFWwindow *glfwWindow, int width, int height) {
     amongus.init();
 
     // Create and compile our GLSL program from the shaders
-    programID = LoadShaders("../src/shaders/shader.vert", "../src/shaders/shader.frag");
-    // Get a handle for our "MVP" uniform
-    Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
+    programID = LoadShaders("../src/shaders/shader3d.vert", "../src/shaders/shaderlight.frag");
+
+    // bind our shader programs
+    glUseProgram(programID);
+    Matrices.mvpId = glGetUniformLocation(programID, "MVP");
+    Matrices.modelId = glGetUniformLocation(programID, "model");
 
     reshapeWindow(glfwWindow, width, height);
 
     // Background color of the scene
-    glClearColor(COLOR_BACKGROUND.r / 256.0, COLOR_BACKGROUND.g / 256.0, COLOR_BACKGROUND.b / 256.0,
-                 0.0f); // R, G, B, A
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // R, G, B, A
     glClearDepth(1.0f);
 
     // Enable Depth Test
@@ -63,17 +61,15 @@ void initGL(GLFWwindow *glfwWindow, int width, int height) {
     std::cout << "RENDERER: " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "VERSION: " << glGetString(GL_VERSION) << std::endl;
     std::cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+
 }
 
 void draw() {
     // clear the color and depth in the frame buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // use the loaded shader program
-    glUseProgram(programID);
-
     // Target - Where is the camera looking at.
-    Matrices.view = glm::lookAt(glm::vec3{amongus.p.position, 10},
+    Matrices.view = glm::lookAt(glm::vec3{amongus.p.position, z},
                                 glm::vec3{amongus.p.position, 0},
                                 glm::vec3{0, 1, 0});
 
@@ -90,7 +86,28 @@ void draw() {
     // Don't change unless you are sure!!
 
     // Scene render
-    amongus.draw(VP);
+    // use the loaded shader program
+//    glUseProgram(programID[0]);
+//
+//    Matrices.mvpId = glGetUniformLocation(programID[0], "MVP");
+//    Matrices.modelId = glGetUniformLocation(programID[0], "model");
+//    setProgramVec3(programID[0], "lightPos", glm::vec3{amongus.p.position, 0.3f});
+//    setProgramVec3(programID[0], "viewPos", glm::vec3{amongus.p.position, 10.0f});
+//    setProgramFloat(programID[0], "ambientStrength", 0.1);
+//    setProgramVec3(programID[0], "lightColor", glm::vec3{1.0f, 1.0f, 1.0f});
+//    setProgramVec3(programID[0], "vertexNormal", glm::vec3{0, 0, 1.0f});
+//    amongus.draw2d(VP);
+
+
+    // use the loaded shader program
+
+
+    setProgramVec3(programID, "lightPos", glm::vec3{amongus.p.position, 1.0f});
+    setProgramVec3(programID, "viewPos", glm::vec3{amongus.p.position, 20.0f});
+    setProgramFloat(programID, "ambientStrength", 0.0f);
+    setProgramFloat(programID, "diffuseStrength", 1.0f);
+    setProgramVec3(programID, "lightColor", glm::vec3{1.0f, 1.0f, 1.0f});
+    amongus.draw3d(VP);
 }
 
 void tick_elements() {
@@ -103,12 +120,18 @@ void tick_input(GLFWwindow *glfwWindow) {
     keys[1] = glfwGetKey(glfwWindow, GLFW_KEY_D);
     keys[2] = glfwGetKey(glfwWindow, GLFW_KEY_W);
     keys[3] = glfwGetKey(glfwWindow, GLFW_KEY_S);
+    if (glfwGetKey(glfwWindow, GLFW_KEY_UP)) {
+        z -= 0.1f;
+    }
+    if (glfwGetKey(glfwWindow, GLFW_KEY_DOWN)) {
+        z += 0.1f;
+    }
     amongus.get_input(keys);
 }
 
 int main(int argc, char **argv) {
-    int width = 600;
-    int height = 600;
+    int width = 900;
+    int height = 900;
 
     window = initGLFW(width, height);
 

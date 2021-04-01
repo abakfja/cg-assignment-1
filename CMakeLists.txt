@@ -24,18 +24,36 @@ target_link_libraries(${PROJECT_NAME} "glfw" "${GLFW_LIBRARIES}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLFW_DIR}/include")
 target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 
-# glad
-set(GLAD_DIR "${LIB_DIR}/glad")
-add_library("glad" "${GLAD_DIR}/src/glad.c")
-target_include_directories("glad" PRIVATE "${GLAD_DIR}/include")
-target_include_directories(${PROJECT_NAME} PRIVATE "${GLAD_DIR}/include")
-target_link_libraries(${PROJECT_NAME} "glad" "${CMAKE_DL_LIBS}")
+## glad
+#set(GLAD_DIR "${LIB_DIR}/glad")
+#add_library("glad" "${GLAD_DIR}/src/glad.c")
+#target_include_directories("glad" PRIVATE "${GLAD_DIR}/include")
+#target_include_directories(${PROJECT_NAME} PRIVATE "${GLAD_DIR}/include")
+#target_link_libraries(${PROJECT_NAME} "glad" "${CMAKE_DL_LIBS}")
+
+#glew
+include(FindPkgConfig)
+if (NOT APPLE)
+    pkg_check_modules(GL REQUIRED gl)
+    include_directories(${GL_INCLUDE_DIRS})
+    target_link_libraries (${PROJECT_NAME} ${GL_LIBRARIES})
+endif()
+
+if (APPLE)
+    target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
+endif()
+# GLEW
+pkg_check_modules(GLEW REQUIRED glew)
+include_directories(${GLEW_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARIES})
+
+
+# glm
+set(GLM_DIR "${LIB_DIR}/glm")
+target_include_directories(${PROJECT_NAME} PRIVATE "${GLM_DIR}")
+
 
 # freetype
 find_package(Freetype REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${FREETYPE_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${FREETYPE_INCLUDE_DIRS})
-
-# glm
-set(GLM_DIR "${LIB_DIR}/glm")
-target_include_directories(${PROJECT_NAME} PRIVATE "${GLM_DIR}")

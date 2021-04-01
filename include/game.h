@@ -15,15 +15,18 @@ public:
     player p;
     impostor im;
     board b;
-    std::vector<wall> walls;
+    maze m;
+    const int row, col;
+    static constexpr int w = 6, h = 6;
 
-    game();
+    game(int r, int c);
 
     void init();
 
-    void draw(glm::mat4);
+    void draw2d(glm::mat4) const;
+    void draw3d(glm::mat4) const;
 
-    void get_input(const int * keys);
+    void get_input(const int *keys);
 };
 
 

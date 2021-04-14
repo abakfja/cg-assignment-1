@@ -22,14 +22,19 @@ public:
     impostor im;
     board b;
     maze m;
+    task im_die_task;
+    task release_task;
+
 
     bool is_dark = true;
     bool impostor_active = true;
+
     int score = 0;
 
-    static constexpr int row = 5, col = 4;
+    static constexpr int row = 10, col = 10;
     static constexpr float w = 6, h = 6;
 
+    std::vector<std::pair<int,int>> adj[row][col];
     std::vector<wall> walls[row][col];
     std::vector<obstacle> obs[row][col];
     std::vector<powerup> pup[row][col];
@@ -56,10 +61,13 @@ public:
     }
 
     bool collides(item it) {
-        return (p.left() <= it.right() &&
+        if (p.left() <= it.right() &&
                 p.right() >= it.left() &&
-                p.top() <= it.bottom() &&
-                p.bottom() >= it.top());
+                p.top() >= it.bottom() &&
+                p.bottom() <= it.top()) {
+            return true;
+        }
+        return false;
     }
 
     game() = default;

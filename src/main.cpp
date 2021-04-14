@@ -7,18 +7,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <ft2build.h>
 #include <window.h>
 #include <matrices.h>
 #include <timer.h>
 #include <player.h>
 #include <game.h>
 
+#include <font.h>
+
 GLMatrices Matrices;
 GLuint programID;
+GLuint fontProgam;
 GLFWwindow *window;
 game amongus{};
-float z = 11.0f;
+float z = 15.0f;
+int frame = 0;
 Timer t60(1.0 / 120);
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
@@ -38,9 +41,11 @@ void initGL(GLFWwindow *glfwWindow, int width, int height) {
     // Create the models
     amongus.init();
 
+    initFreetype();
+
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("../src/shaders/shader3d.vert", "../src/shaders/shaderlight.frag");
-
+    fontProgam = LoadShaders("../src/shaders/fontshader.vert", "../src/shaders/fontshader.frag");
     // bind our shader programs
     glUseProgram(programID);
     Matrices.mvpId = glGetUniformLocation(programID, "MVP");
@@ -87,39 +92,39 @@ void draw() {
 
     // Scene render
     // use the loaded shader program
-//    glUseProgram(programID[0]);
-//
-//    Matrices.mvpId = glGetUniformLocation(programID[0], "MVP");
-//    Matrices.modelId = glGetUniformLocation(programID[0], "model");
-//    setProgramVec3(programID[0], "lightPos", glm::vec3{amongus.p.position, 0.3f});
-//    setProgramVec3(programID[0], "viewPos", glm::vec3{amongus.p.position, 10.0f});
-//    setProgramFloat(programID[0], "ambientStrength", 0.1);
-//    setProgramVec3(programID[0], "lightColor", glm::vec3{1.0f, 1.0f, 1.0f});
-//    setProgramVec3(programID[0], "vertexNormal", glm::vec3{0, 0, 1.0f});
-//    amongus.draw2d(VP);
 
-
+    glUseProgram(programID);
     // use the loaded shader program
-
-
     setProgramVec3(programID, "lightPos", glm::vec3{amongus.p.position, 1.0f});
     setProgramVec3(programID, "viewPos", glm::vec3{amongus.p.position, 20.0f});
-    setProgramFloat(programID, "ambientStrength", 0.0f);
-    setProgramFloat(programID, "diffuseStrength", 1.0f);
+    setProgramFloat(programID, "ambientStrength", amongus.is_dark ? 0.0f : 0.8f);
+    setProgramFloat(programID, "diffuseStrength", amongus.is_dark ? 1.0f : 0.0f);
     setProgramVec3(programID, "lightColor", glm::vec3{1.0f, 1.0f, 1.0f});
     amongus.draw(VP);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glUseProgram(fontProgam);
+    glm::mat4 projection = glm::ortho(0.0f, 900.0f, 0.0f, 900.0f, 10.0f, -10.0f);
+    glUniformMatrix4fv(glGetUniformLocation(fontProgam, "projection"), 1, GL_FALSE, &projection[0][0]);
+    RenderText(fontProgam, "light: " + std::to_string(amongus.is_dark), 12.0f, 12.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+    RenderText(fontProgam, "score: " + std::to_string(amongus.score), 12.0f, 38.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+    RenderText(fontProgam, "time: " + std::to_string(frame * 0.002), 12.0f, 64.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+    glDisable(GL_BLEND);
 }
+
 
 void tick_elements() {
 
 }
 
 void tick_input(GLFWwindow *glfwWindow) {
-    int keys[4];
+    int keys[5];
     keys[0] = glfwGetKey(glfwWindow, GLFW_KEY_A);
     keys[1] = glfwGetKey(glfwWindow, GLFW_KEY_D);
     keys[2] = glfwGetKey(glfwWindow, GLFW_KEY_W);
     keys[3] = glfwGetKey(glfwWindow, GLFW_KEY_S);
+    keys[4] = glfwGetKey(glfwWindow, GLFW_KEY_K);
     if (glfwGetKey(glfwWindow, GLFW_KEY_UP)) {
         z -= 0.1f;
     }
@@ -136,7 +141,7 @@ int main(int argc, char **argv) {
     window = initGLFW(width, height);
 
     initGL(window, width, height);
-
+    frame = 0;
     /* Draw in loop */
     while (!glfwWindowShouldClose(window)) {
         // Process timers
@@ -151,7 +156,10 @@ int main(int argc, char **argv) {
             tick_elements();
             tick_input(window);
         }
-
+        frame++;
+        if (frame > 100000) {
+            quit(window);
+        }
         // Poll for Keyboard and mouse events
         glfwPollEvents();
     }

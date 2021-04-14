@@ -13,9 +13,11 @@ struct item {
     glm::vec2 position{};
 
     item() = default;
+
     int score = 0;
     color_t color{};
     GLfloat size = 0.5;
+    bool active = true;
 
     GLfloat top() const {
         return position.y + size;
@@ -44,8 +46,10 @@ struct item {
 
 
 struct obstacle : item {
-    explicit obstacle(glm::vec2 pos): item(pos) {
-        color = color_t{10,10,10};
+    obstacle() = default;
+
+    explicit obstacle(glm::vec2 pos) : item(pos) {
+        color = color_t{10, 10, 10};
         score = -100;
         init();
     }
@@ -53,7 +57,9 @@ struct obstacle : item {
 
 
 struct powerup : item {
-    explicit powerup(glm::vec2 pos): item(pos) {
+    powerup() = default;
+
+    explicit powerup(glm::vec2 pos) : item(pos) {
         color = color_t{222, 203, 0};
         score = 100;
         init();
@@ -62,8 +68,17 @@ struct powerup : item {
 
 
 struct task : item {
-    explicit task(glm::vec2 pos): item(pos) {
+    task() = default;
+
+    explicit task(glm::vec2 pos) : item(pos) {
         color = color_t{222, 0, 222};
+        score = 0;
+        size = 1.0f;
+        init();
+    }
+
+    explicit task(glm::vec2 pos, color_t col) : item(pos) {
+        color = col;
         score = 0;
         size = 1.0f;
         init();

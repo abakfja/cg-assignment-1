@@ -29,8 +29,8 @@ void game::init() {
         }
     }
     m.init();
-    p = player{glm::vec2{w / 2, h / 2}, 0.1f};
-    im = impostor{glm::vec2{(row - 0.5) * w, (col - 0.5) * h}, 0.1f};
+    p = player{glm::vec2{w / 2, h / 2}, 0.2f};
+    im = impostor{glm::vec2{(1.5) * w, (0.5) * h}, 0.1f};
     im_die_task = task(glm::vec2{(static_cast<float>(rand() % row) + 0.5f) * w,
                                  (static_cast<float>(rand() % col) + 0.5f) * h}, {255, 0, 0});
     release_task = task(glm::vec2{(static_cast<float>(rand() % row) + 0.5f) * w,
@@ -117,13 +117,19 @@ void game::get_input(const int *keys) {
     }
     if (im_die_task.active && collides(im_die_task)) {
         im_die_task.active = false;
+        impostor_active = false;
     }
     if (release_task.active && collides(release_task)) {
         release_task.active = false;
         gen_items();
     }
+    if (impostor_active) {
+        move_impostor();
+    }
+    if (!is_dark) {
+        score -= 0.05;
+    }
 }
-
 
 void game::gen_maze() {
     using namespace std;
@@ -167,6 +173,64 @@ void game::gen_maze() {
         }
     };
     dfs(0, 0, -1, -1);
+}
+
+std::pair<int,int> game::get_next() {
+    auto [rr, cc] = impostor_b();
+    for (auto [r, c]: adj[rr][cc]) {
+        std::vector<std::vector<int>> vis(row, std::vector<int>(col, false));
+        std::function<bool(int,int)> dfs = [&](int x, int y) {
+           vis[x][y] = true;
+           bool res = std::make_pair(x,y) == player_b();
+           for (auto [ur, uc]: adj[x][y]) {
+               if (!vis[ur][uc]) {
+                   res |= dfs(ur, uc);
+               }
+           }
+           return res;
+        };
+        vis[rr][cc] = true;
+        if (dfs(r,c)) {
+            std::cout << r << " " << c << std::endl;
+            return std::make_pair(r,c);
+        }
+    }
+    assert(false);
+}
+
+void game::move_impostor() {
+    if (player_b() == impostor_b()) {
+//        std::cout << "here" << std::endl;
+        impostor_highway = false;
+        auto diff = p.position - im.position;
+        if (std::abs(diff.x) < 0.02f && std::abs(diff.y) < 0.02f) {
+            lost = true;
+            return;
+        }
+        im.position += im.speed * (glm::normalize(diff));
+        auto pos = impostor_b();
+        auto center = glm::vec2((pos.first + 0.5) * w, (pos.second + 0.5)* h);
+        diff = im.position - center;
+        if (std::abs(diff.x) < 0.02f && std::abs(diff.y) < 0.02f) {
+            impostor_highway = true;
+        }
+    } else {
+//        std::cout << "now here" << std::endl;
+        auto pos = impostor_b();
+        auto center = glm::vec2((pos.first + 0.5) * w, (pos.second + 0.5)* h);
+        auto diff = im.position - center;
+        if (std::abs(diff.x) < 0.02f && std::abs(diff.y) < 0.02f) {
+            impostor_highway = true;
+        }
+        if (impostor_highway) {
+            auto nxt = get_next();
+            center = glm::vec2((nxt.first + 0.5) * w, (nxt.second + 0.5)* h);
+            diff = center - im.position;
+            im.position += im.speed * glm::normalize(diff);
+        } else {
+            im.position -= 0.1f * (diff);
+        }
+    }
 }
 
 void game::gen_items() {

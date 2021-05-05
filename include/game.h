@@ -28,8 +28,10 @@ public:
 
     bool is_dark = true;
     bool impostor_active = true;
+    bool impostor_highway = true;
+    bool lost = false;
 
-    int score = 0;
+    double score = 0;
 
     static constexpr int row = 10, col = 10;
     static constexpr float w = 6, h = 6;
@@ -73,6 +75,10 @@ public:
     game() = default;
 
     void init();
+
+    void move_impostor();
+
+    std::pair<int,int> get_next();
 
     void gen_maze();
 

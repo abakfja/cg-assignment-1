@@ -58,9 +58,9 @@ void initGL(GLFWwindow *glfwWindow, int width, int height) {
     glClearDepth(1.0f);
 
     // Enable Depth Test
-    glEnable(GL_DEPTH_TEST);
+//    glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
-    glDepthFunc(GL_LEQUAL);
+//    glDepthFunc(GL_LEQUAL);
 
     std::cout << "VENDOR: " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "RENDERER: " << glGetString(GL_RENDERER) << std::endl;
@@ -91,10 +91,9 @@ void draw() {
     // Don't change unless you are sure!!
 
     // Scene render
-    // use the loaded shader program
 
-    glUseProgram(programID);
     // use the loaded shader program
+    glUseProgram(programID);
     setProgramVec3(programID, "lightPos", glm::vec3{amongus.p.position, 1.0f});
     setProgramVec3(programID, "viewPos", glm::vec3{amongus.p.position, 20.0f});
     setProgramFloat(programID, "ambientStrength", amongus.is_dark ? 0.0f : 0.8f);
@@ -102,15 +101,17 @@ void draw() {
     setProgramVec3(programID, "lightColor", glm::vec3{1.0f, 1.0f, 1.0f});
     amongus.draw(VP);
 
+    // use the loaded shader program
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUseProgram(fontProgam);
     glm::mat4 projection = glm::ortho(0.0f, 900.0f, 0.0f, 900.0f, 10.0f, -10.0f);
     glUniformMatrix4fv(glGetUniformLocation(fontProgam, "projection"), 1, GL_FALSE, &projection[0][0]);
     RenderText(fontProgam, "light: " + std::to_string(amongus.is_dark), 12.0f, 12.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-    RenderText(fontProgam, "score: " + std::to_string(amongus.score), 12.0f, 38.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-    RenderText(fontProgam, "time: " + std::to_string(frame * 0.002), 12.0f, 64.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+    RenderText(fontProgam, "score: " + std::to_string(std::round(amongus.score)), 12.0f, 38.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+    RenderText(fontProgam, "time: " + std::to_string(std::round(frame * 0.02)), 12.0f, 64.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
     glDisable(GL_BLEND);
+
 }
 
 
@@ -155,6 +156,9 @@ int main(int argc, char **argv) {
 
             tick_elements();
             tick_input(window);
+            if (amongus.lost) {
+                quit(window);
+            }
         }
         frame++;
         if (frame > 100000) {

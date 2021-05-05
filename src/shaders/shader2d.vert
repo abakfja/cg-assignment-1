@@ -15,7 +15,7 @@ out vec3 normal;
 
 void main ()
 {
-    vec4 v = vec4(vertexPosition, 0, 1);// Transform an homogeneous 4D vector
+    vec4 v = vec4(vertexPosition, -1, 1);// Transform an homogeneous 4D vector
 
     // The color of each vertex will be interpolated
     // to produce the color of each fragment
